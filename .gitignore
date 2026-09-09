@@ -1,0 +1,28 @@
+﻿# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Testing y logs
+coverage/
+npm-debug.log*
+
+# Entorno y credenciales
+.env
+.env.local
+
+# Bases de datos locales
+*.sqlite
+*.sqlite3
+*.db
+backend/database.sqlite
+
+# Build y produccion
+dist/
+build/
+
+# Archivos de sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

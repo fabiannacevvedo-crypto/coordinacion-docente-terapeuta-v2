@@ -1,0 +1,27 @@
+{
+  "name": "coordinacion-backend-v2",
+  "version": "2.0.0",
+  "description": "Backend API para coordinacion docente-terapeuta con roles, validaciones y verificacion",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch app.js",
+    "start": "node app.js",
+    "seed": "node src/seeds/seed.js"
+  },
+  "keywords": ["coordinacion", "docente", "terapeuta", "roles", "express-validator", "sequelize"],
+  "author": "Equipo RedNeC",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.1.7"
+  }
+}

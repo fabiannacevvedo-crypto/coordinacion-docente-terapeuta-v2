@@ -1,14 +1,23 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const resolvedSqlitePath = process.env.DB_STORAGE 
+  ? path.resolve(process.cwd(), process.env.DB_STORAGE) 
+  : path.resolve(__dirname, "../../../database.sqlite");
 
 const isSqlite = (process.env.DB_DIALECT || "sqlite") === "sqlite";
 
 export const sequelize = isSqlite
   ? new Sequelize({
       dialect: "sqlite",
-      storage: process.env.DB_STORAGE || "./database.sqlite",
+      storage: resolvedSqlitePath,
       logging: false,
       define: {
         timestamps: true,

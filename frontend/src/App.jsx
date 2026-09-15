@@ -7,6 +7,9 @@ import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { GuiaVerificacion } from "./pages/GuiaVerificacion";
+import { Informacion } from "./pages/Informacion";
+import { Contacto } from "./pages/Contacto";
+import { Seguimiento } from "./pages/Seguimiento";
 import { DashboardDocente } from "./pages/DashboardDocente";
 import { DashboardTerapeuta } from "./pages/DashboardTerapeuta";
 import { DashboardFamiliar } from "./pages/DashboardFamiliar";
@@ -30,6 +33,9 @@ export const App = () => {
             <Routes>
               {/* Rutas Publicas */}
               <Route path="/" element={<Home />} />
+              <Route path="/informacion" element={<Informacion />} />
+              <Route path="/contacto" element={<Contacto />} />
+              <Route path="/seguimiento" element={<Seguimiento />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/guia-verificacion" element={<GuiaVerificacion />} />

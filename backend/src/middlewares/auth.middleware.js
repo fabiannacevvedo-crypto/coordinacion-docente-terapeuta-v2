@@ -3,14 +3,18 @@ import { UserModel, RoleModel, DocentePerfilModel, TerapeutaPerfilModel, Familia
 
 export const authMiddleware = async (req, res, next) => {
   try {
-    // 1. Extraer token de cookie o de Authorization Header (Bearer)
-    let token = req.cookies ? req.cookies.token : null;
+    // 1. Extraer token de Authorization Header (Bearer) o cookie HttpOnly
+    let token = null;
 
-    if (!token && req.headers.authorization) {
+    if (req.headers && req.headers.authorization) {
       const parts = req.headers.authorization.split(" ");
-      if (parts.length === 2 && parts[0] === "Bearer") {
+      if (parts.length === 2 && parts[0].toLowerCase() === "bearer") {
         token = parts[1];
       }
+    }
+
+    if (!token && req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {

@@ -21,6 +21,9 @@ export const request = async (endpoint, options = {}) => {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    if (response.status === 401 && endpoint !== "/auth/login") {
+      localStorage.removeItem("rednec_token");
+    }
     const errorMsg = data.errores
       ? data.errores.map((e) => e.mensaje).join(", ")
       : data.mensaje || "Error en la comunicacion con el servidor";

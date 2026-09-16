@@ -35,7 +35,7 @@ app.use(cookieParser());
   try {
     await sequelize.authenticate();
     console.log(`✅ Base de datos conectada correctamente (${process.env.DB_DIALECT || "sqlite"})`);
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("✅ Tablas y relaciones sincronizadas con Sequelize");
   } catch (error) {
     console.error("❌ Error al conectar con la base de datos:", error.message);

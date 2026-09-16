@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { AlumnoModel, VinculoAlumnoModel, UserModel, ReporteModel } from "../models/index.js";
 
 // Generador de tokens unicos tipo TOKEN-8A2F
@@ -112,10 +113,12 @@ export const vincularAlumnoPorCodigo = async (req, res) => {
 
     // Buscar si el codigo coincide con codigo_familiar o codigo_equipo
     const alumno = await AlumnoModel.findOne({
-      where: sequelize.or(
-        { codigo_familiar: codigoUpper },
-        { codigo_equipo: codigoUpper }
-      ),
+      where: {
+        [Op.or]: [
+          { codigo_familiar: codigoUpper },
+          { codigo_equipo: codigoUpper },
+        ],
+      },
     });
 
     if (!alumno) {

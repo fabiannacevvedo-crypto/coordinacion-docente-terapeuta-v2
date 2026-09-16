@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
           const res = await api.getPerfil();
           if (res.ok && res.usuario) {
             setUser(res.usuario);
-            const userRoles = res.usuario.roles ? res.usuario.roles.map((r) => r.name) : [];
+            const rawRoles = res.roles || res.usuario.roles || [];
+            const userRoles = rawRoles.map((r) => (typeof r === "string" ? r : r.name)).filter(Boolean);
             setRoles(userRoles);
             setActiveRole(userRoles[0] || null);
           }
@@ -42,8 +43,10 @@ export const AuthProvider = ({ children }) => {
     if (res.ok && res.token) {
       localStorage.setItem("rednec_token", res.token);
       setUser(res.usuario);
-      setRoles(res.usuario.roles || []);
-      setActiveRole(res.usuario.roles?.[0] || null);
+      const rawRoles = res.usuario.roles || [];
+      const userRoles = rawRoles.map((r) => (typeof r === "string" ? r : r.name)).filter(Boolean);
+      setRoles(userRoles);
+      setActiveRole(userRoles[0] || null);
     }
     return res;
   };
@@ -53,8 +56,10 @@ export const AuthProvider = ({ children }) => {
     if (res.ok && res.token) {
       localStorage.setItem("rednec_token", res.token);
       setUser(res.usuario);
-      setRoles(res.usuario.roles || []);
-      setActiveRole(res.usuario.roles?.[0] || null);
+      const rawRoles = res.usuario.roles || [];
+      const userRoles = rawRoles.map((r) => (typeof r === "string" ? r : r.name)).filter(Boolean);
+      setRoles(userRoles);
+      setActiveRole(userRoles[0] || null);
     }
     return res;
   };

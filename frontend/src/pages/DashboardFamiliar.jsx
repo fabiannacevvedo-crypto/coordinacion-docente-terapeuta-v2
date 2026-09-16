@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import { SemaforoBadge } from "../components/common/SemaforoBadge";
-import { Users, Copy, Check, PlusCircle, FileText } from "lucide-react";
+import { Users, Copy, Check, PlusCircle, FileText, Link2, CheckCircle2 } from "lucide-react";
 
 export const DashboardFamiliar = () => {
   const { user } = useAuth();
@@ -11,6 +11,7 @@ export const DashboardFamiliar = () => {
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(null);
 
+  // Modal para reporte familiar
   const [showModal, setShowModal] = useState(false);
   const [selectedAlumno, setSelectedAlumno] = useState(null);
   const [reporteData, setReporteData] = useState({
@@ -20,6 +21,12 @@ export const DashboardFamiliar = () => {
     estrategia_sugerida: "",
   });
   const [successMsg, setSuccessMsg] = useState(false);
+
+  // Modal para vincular alumno
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [codigoVinculo, setCodigoVinculo] = useState("");
+  const [linkError, setLinkError] = useState(null);
+  const [linkSuccess, setLinkSuccess] = useState(false);
 
   const cargarAlumnos = async () => {
     try {
@@ -64,25 +71,57 @@ export const DashboardFamiliar = () => {
     }
   };
 
+  const handleVincular = async (e) => {
+    e.preventDefault();
+    setLinkError(null);
+    setLinkSuccess(false);
+
+    try {
+      await api.vincularAlumno(codigoVinculo);
+      setLinkSuccess(true);
+      setCodigoVinculo("");
+      setTimeout(() => {
+        setShowLinkModal(false);
+        setLinkSuccess(false);
+        cargarAlumnos();
+      }, 1200);
+    } catch (err) {
+      setLinkError(err.message);
+    }
+  };
+
   return (
     <div>
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--familiar-color)", fontWeight: "700", fontSize: "0.875rem", textTransform: "uppercase" }}>
-          <Users size={20} /> Espacio Familiar
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--familiar-color)", fontWeight: "700", fontSize: "0.875rem", textTransform: "uppercase" }}>
+            <Users size={20} /> Espacio Familiar
+          </div>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: "800", color: "#0f172a" }}>
+            Hola, {user?.nombre} {user?.apellido}
+          </h1>
+          <p style={{ fontSize: "0.875rem", color: "#64748b" }}>
+            Seguimiento del día a día de tus hijos en conjunto con la escuela y sus terapeutas
+          </p>
         </div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: "800", color: "#0f172a" }}>
-          Hola, {user?.nombre} {user?.apellido}
-        </h1>
-        <p style={{ fontSize: "0.875rem", color: "#64748b" }}>
-          Seguimiento del dia a dia de tus hijos en conjunto con la escuela y sus terapeutas
-        </p>
+
+        <button
+          onClick={() => setShowLinkModal(true)}
+          className="btn btn-primary"
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
+        >
+          <Link2 size={16} /> Vincular Hijo/a con Código
+        </button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "3rem" }}>Cargando informacion...</div>
+        <div style={{ textAlign: "center", padding: "3rem" }}>Cargando información...</div>
       ) : alumnos.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "3rem" }}>
-          <p style={{ color: "#64748b" }}>No tienes hijos vinculados actualmente.</p>
+          <p style={{ color: "#64748b", marginBottom: "1rem" }}>No tienes hijos vinculados actualmente.</p>
+          <button onClick={() => setShowLinkModal(true)} className="btn btn-primary">
+            <Link2 size={16} /> Vincular con Código Escolar
+          </button>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
@@ -105,14 +144,14 @@ export const DashboardFamiliar = () => {
 
                   <div style={{ background: "#ecfdf5", border: "1px solid #d1fae5", padding: "0.5rem 1rem", borderRadius: "10px", display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <div>
-                      <div style={{ fontSize: "0.75rem", fontWeight: "700", color: "#065f46" }}>CODIGO PARA PROFESIONALES:</div>
+                      <div style={{ fontSize: "0.75rem", fontWeight: "700", color: "#065f46" }}>CÓDIGO PARA PROFESIONALES:</div>
                       <div style={{ fontFamily: "monospace", fontSize: "1rem", fontWeight: "800", color: "#047857" }}>{alumno.codigo_equipo}</div>
                     </div>
                     <button
                       onClick={() => copiarAlPortapapeles(alumno.codigo_equipo)}
                       className="btn btn-secondary"
                       style={{ padding: "0.35rem 0.6rem", fontSize: "0.75rem", background: "white" }}
-                      title="Copiar codigo para enviar al terapeuta"
+                      title="Copiar código para enviar al terapeuta"
                     >
                       {copiedCode === alumno.codigo_equipo ? <Check size={14} color="#059669" /> : <Copy size={14} />}
                     </button>
@@ -135,7 +174,7 @@ export const DashboardFamiliar = () => {
                         </p>
                         {ultimoDocente.estrategia_sugerida && (
                           <div style={{ fontSize: "0.75rem", color: "#0284c7", background: "white", padding: "0.5rem", borderRadius: "6px" }}>
-                            💡 <strong>Recomendacion del docente:</strong> {ultimoDocente.estrategia_sugerida}
+                            💡 <strong>Recomendación del docente:</strong> {ultimoDocente.estrategia_sugerida}
                           </div>
                         )}
                       </div>
@@ -164,7 +203,7 @@ export const DashboardFamiliar = () => {
                         )}
                       </div>
                     ) : (
-                      <p style={{ fontSize: "0.8125rem", color: "#64748b" }}>Sin notas terapeuticas recientes.</p>
+                      <p style={{ fontSize: "0.8125rem", color: "#64748b" }}>Sin notas terapéuticas recientes.</p>
                     )}
                   </div>
                 </div>
@@ -179,9 +218,8 @@ export const DashboardFamiliar = () => {
                       setShowModal(true);
                     }}
                     className="btn btn-primary"
-                    style={{ background: "var(--familiar-color)" }}
                   >
-                    <PlusCircle size={16} /> Compartir Observacion Familiar
+                    <PlusCircle size={16} /> Aportar Nota Familiar
                   </button>
                 </div>
               </div>
@@ -190,23 +228,30 @@ export const DashboardFamiliar = () => {
         </div>
       )}
 
+      {/* Modal Aportar Nota Familiar */}
       {showModal && selectedAlumno && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}>
-          <div className="card" style={{ maxWidth: "500px", width: "100%" }}>
+          <div className="card" style={{ maxWidth: "540px", width: "100%" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ fontSize: "1.125rem", fontWeight: "700" }}>Compartir novedad con docentes y terapeutas</h3>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                Nota del Hogar: {selectedAlumno.nombre} {selectedAlumno.apellido}
+              </h3>
               <button onClick={() => setShowModal(false)} style={{ fontSize: "1.25rem", color: "#64748b" }}>✕</button>
             </div>
 
-            {successMsg && <div className="alert alert-success">Observacion compartida con el equipo</div>}
+            {successMsg && (
+              <div className="alert alert-success">
+                Nota guardada exitosamente. Visible para el equipo docente y terapéutico.
+              </div>
+            )}
 
             <form onSubmit={handleCrearReporteFamiliar}>
               <div className="form-group">
-                <label className="form-label">Tema principal</label>
+                <label className="form-label">Asunto o situación</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej: Cambio de rutina de sueno / Fin de semana"
+                  placeholder="Ej: Rutina de sueño durante la semana, medicación, estado de ánimo"
                   className="form-input"
                   value={reporteData.titulo}
                   onChange={(e) => setReporteData({ ...reporteData, titulo: e.target.value })}
@@ -214,24 +259,24 @@ export const DashboardFamiliar = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">¿Como estuvo en casa?</label>
+                <label className="form-label">Semáforo de Bienestar en Casa</label>
                 <select
                   className="form-select"
                   value={reporteData.semaforo}
                   onChange={(e) => setReporteData({ ...reporteData, semaforo: e.target.value })}
                 >
-                  <option value="bueno">🟢 Muy bien (Tranquilo, buen descanso y colaborativo)</option>
-                  <option value="regular">🟡 Normal con algunos momentos de desgano</option>
-                  <option value="atencion">🔴 Desafiante (Poco sueno, angustia o irritabilidad)</option>
+                  <option value="bueno">🟢 Tranquilo/a (Semana con rutinas estables)</option>
+                  <option value="regular">🟡 Regular (Cierto cansancio o irritabilidad transitoria)</option>
+                  <option value="atencion">🔴 Atención (Cambio de medicación o crisis en el hogar)</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Detalle para el equipo</label>
+                <label className="form-label">Detalle de la vivencia</label>
                 <textarea
                   rows={4}
                   required
-                  placeholder="Escribe lo que consideres importante que el docente o terapeuta sepa antes de iniciar la semana..."
+                  placeholder="Comenta lo que consideres importante para que la maestra y los terapeutas tengan en cuenta..."
                   className="form-textarea"
                   value={reporteData.observaciones}
                   onChange={(e) => setReporteData({ ...reporteData, observaciones: e.target.value })}
@@ -242,8 +287,56 @@ export const DashboardFamiliar = () => {
                 <button type="button" onClick={() => setShowModal(false)} className="btn btn-secondary">
                   Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ background: "var(--familiar-color)" }}>
-                  Enviar Novedad
+                <button type="submit" className="btn btn-primary">
+                  Enviar al Equipo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Vincular Alumno por Código */}
+      {showLinkModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}>
+          <div className="card" style={{ maxWidth: "440px", width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                Vincular Hijo/a con Código
+              </h3>
+              <button onClick={() => setShowLinkModal(false)} style={{ fontSize: "1.25rem", color: "#64748b" }}>✕</button>
+            </div>
+
+            {linkError && <div className="alert alert-danger">{linkError}</div>}
+            {linkSuccess && (
+              <div className="alert alert-success">
+                <CheckCircle2 size={18} /> ¡Vinculación confirmada exitosamente!
+              </div>
+            )}
+
+            <form onSubmit={handleVincular}>
+              <div className="form-group">
+                <label className="form-label">Código Familiar</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: FAM-7B3K9P"
+                  className="form-input"
+                  style={{ textTransform: "uppercase", letterSpacing: "1px", fontFamily: "monospace" }}
+                  value={codigoVinculo}
+                  onChange={(e) => setCodigoVinculo(e.target.value)}
+                />
+                <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.25rem" }}>
+                  Ingresa el código proporcionado por la escuela en la inscripción del estudiante.
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1rem" }}>
+                <button type="button" onClick={() => setShowLinkModal(false)} className="btn btn-secondary">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Vincular
                 </button>
               </div>
             </form>
@@ -253,3 +346,5 @@ export const DashboardFamiliar = () => {
     </div>
   );
 };
+
+export default DashboardFamiliar;

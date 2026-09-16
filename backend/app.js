@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { sequelize } from "./src/models/index.js";
+import { asegurarBaseDeDatos } from "./src/config/database.js";
 
 // Rutas
 import authRoutes from "./src/routes/auth.routes.js";
@@ -14,14 +15,20 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // ======================================
 // MIDDLEWARES GLOBALES
 // ======================================
 app.use(
   cors({
-    origin: [FRONTEND_URL, "http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: (origin, callback) => {
+      // Permite solicitudes sin origen (como Postman o scripts) o cualquier localhost/127.0.0.1
+      if (!origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origen no permitido por CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -29,16 +36,19 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ======================================
-// CONEXION A LA BASE DE DATOS
+// CONEXION A LA BASE DE DATOS (MYSQL WAMPSERVER)
 // ======================================
 (async () => {
   try {
+    await asegurarBaseDeDatos();
     await sequelize.authenticate();
-    console.log(`✅ Base de datos conectada correctamente (${process.env.DB_DIALECT || "sqlite"})`);
+    const dbName = process.env.DB_NAME || "rednec_db_2";
+    console.log(`✅ Base de datos MySQL conectada correctamente (${dbName} en WampServer)`);
     await sequelize.sync();
-    console.log("✅ Tablas y relaciones sincronizadas con Sequelize");
+    console.log("✅ Tablas y relaciones sincronizadas con Sequelize en MySQL");
   } catch (error) {
-    console.error("❌ Error al conectar con la base de datos:", error.message);
+    console.error("❌ Error al conectar con la base de datos MySQL:", error.message);
+    console.error("💡 Verifica que WampServer tenga el servicio MySQL activo en el puerto 3306.");
   }
 })();
 
@@ -75,9 +85,17 @@ app.use((err, req, res, next) => {
 // ======================================
 // INICIO DEL SERVIDOR
 // ======================================
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Servidor backend v2 corriendo en http://localhost:${PORT}`);
-  console.log(`📡 Esperando conexiones del frontend en ${FRONTEND_URL}`);
+  console.log(`📡 Esperando conexiones del frontend (CORS habilitado para localhost en cualquier puerto)`);
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`❌ El puerto ${PORT} ya está en uso. Cierra el proceso anterior o define otro PORT en .env.`);
+  } else {
+    console.error("❌ Error en el servidor backend:", err.message);
+  }
 });
 
 export default app;

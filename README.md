@@ -29,26 +29,43 @@ Plataforma integral y multidisciplinar para la coordinacion del seguimiento peda
 
 ---
 
+## Requisitos y Base de Datos (WampServer)
+
+- **WampServer** en ejecucion con servicio **MySQL** activo en el puerto `3306`.
+- Usuario por defecto: `root` (sin contrasenia).
+- Base de datos por defecto: `rednec_db_2` (se crea automaticamente al iniciar si no existe).
+
+---
+
 ## Como Iniciar el Proyecto
 
-### 1. Iniciar el Backend (API)
+### Opcion Rapida (Iniciar Todo con un Solo Comando):
 
-`ash
-cd backend
-npm install
-npm run seed     # Siembra roles, usuarios verificados, usuarios pendientes y alumnos de prueba
-npm run dev      # Inicia el servidor en http://localhost:3001
-`
+En la raiz del proyecto ejecuta:
 
-### 2. Iniciar el Frontend (React)
+```bash
+npm run dev
+```
 
-En otra terminal:
+Este comando iniciara concurrentemente:
+- **Backend API:** `http://localhost:3001` (conectado a MySQL en WampServer).
+- **Frontend React (Vite):** `http://localhost:5173` (o el siguiente puerto libre).
 
-`ash
-cd frontend
-npm install
-npm run dev      # Inicia la aplicacion React en http://localhost:5173
-`
+---
+
+### Poblar la Base de Datos con Datos de Prueba:
+
+```bash
+npm run seed
+```
+
+---
+
+### Comandos Individuales:
+
+- **Solo Backend:** `npm run dev:backend`
+- **Solo Frontend:** `npm run dev:frontend`
+- **Compilar Frontend:** `npm run build:frontend`
 
 ---
 
